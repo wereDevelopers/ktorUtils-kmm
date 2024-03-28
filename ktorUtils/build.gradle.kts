@@ -18,6 +18,8 @@ kotlin {
                 jvmTarget = JavaVersion.VERSION_17.toString()
             }
         }
+        publishLibraryVariants("release")
+        //publishAllLibraryVariants()
     }
 
     jvm("desktop"){
