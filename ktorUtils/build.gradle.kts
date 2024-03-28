@@ -140,19 +140,66 @@ android {
 //    }
 //}
 
+val publicationName = "ktorUtils"
+
+
+
 afterEvaluate {
+    configure<PublishingExtension> {
+        publications.all {
+            val mavenPublication = this as? MavenPublication
+            mavenPublication?.artifactId =
+                "${project.name}${"-$name".takeUnless { "kotlinMultiplatform" in name }.orEmpty()}"
+        }
+    }
+
     publishing {
         publications {
             create<MavenPublication>("release") {
+                groupId = project.group.toString()
+                artifactId = project.name
+                version = project.version.toString()
                 from(components["release"])
-
-                groupId = "com.github.weredevelopers"
-                artifactId = "ktorUtils"
-                version = "1.0.0"
+            }
+            publishing.publications.map {
+                it.name
+            }.find {
+                it != "kotlinMultiplatform"
             }
         }
     }
 }
+
+
+configure<PublishingExtension> {
+    publications {
+        withType<MavenPublication> {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+        }
+    }
+    repositories {
+        // publish locally, then a github action pushes it to a different git repo where i'm using github pages as a maven repo
+        // publishToMavenLocal doesn't seem to work, it doesn't create the js and jvm publications for some reason.
+        // that's why we're running publish instead, and just setting the maven repo to a local file
+        maven("file://${System.getenv("HOME")}/.m2/repository")
+    }
+}
+
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            create<MavenPublication>("release") {
+//                from(components["release"])
+//
+//                groupId = "com.github.weredevelopers"
+//                artifactId = "ktorUtils"
+//                version = "1.0.0"
+//            }
+//        }
+//    }
+//}
 
 if (System.getenv("JITPACK") == "true")
     tasks["publishToMavenLocal"].doLast {
