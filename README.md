@@ -12,7 +12,7 @@ add in the Gradle
 
 ```groovy
 dependencies {
-    implementation('com.github.wereDevelopers:retrofitUtils:{LastTag}')
+    implementation('com.github.wereDevelopers:ktorUtils:{LastTag}')
 }
 ```
 
