@@ -201,36 +201,35 @@ configure<PublishingExtension> {
 //    }
 //}
 
-if (System.getenv("JITPACK") == "true")
-    tasks["publishToMavenLocal"].doLast {
-        val version = System.getenv("VERSION")
-        val artifacts = publishing.publications.filterIsInstance<MavenPublication>().map { it.artifactId }
+tasks["publishToMavenLocal"].doLast {
+    val version = System.getenv("VERSION")
+    val artifacts = publishing.publications.filterIsInstance<MavenPublication>().map { it.artifactId }
 
-        val dir: File = File(publishing.repositories.mavenLocal().url)
-            .resolve(project.group.toString().replace('.', '/'))
+    val dir: File = File(publishing.repositories.mavenLocal().url)
+        .resolve(project.group.toString().replace('.', '/'))
 
-        dir.listFiles { it -> it.name in artifacts }
-            .flatMap {
-                (
-                        it.listFiles { it -> it.isDirectory }?.toList()
-                            ?: emptyList<File>()
-                        ) + it.resolve("maven-metadata-local.xml")
-            }
-            .flatMap {
-                if (it.isDirectory) {
-                    it.listFiles { it ->
-                        it.extension == "module" ||
-                                "maven-metadata" in it.name ||
-                                it.extension == "pom"
-                    }?.toList() ?: emptyList()
-                } else listOf(it)
-            }
-            .forEach {
-                val text = it.readText()
-                println("Replacing ${project.version} with $version in $it")
-                it.writeText(text.replace(project.version.toString(), version))
-            }
-    }
+    dir.listFiles { it -> it.name in artifacts }
+        .flatMap {
+            (
+                    it.listFiles { it -> it.isDirectory }?.toList()
+                        ?: emptyList<File>()
+                    ) + it.resolve("maven-metadata-local.xml")
+        }
+        .flatMap {
+            if (it.isDirectory) {
+                it.listFiles { it ->
+                    it.extension == "module" ||
+                            "maven-metadata" in it.name ||
+                            it.extension == "pom"
+                }?.toList() ?: emptyList()
+            } else listOf(it)
+        }
+        .forEach {
+            val text = it.readText()
+            println("Replacing ${project.version} with $version in $it")
+            it.writeText(text.replace(project.version.toString(), version))
+        }
+}
 
 
 fun getVersionName(name: String? = null): String {
